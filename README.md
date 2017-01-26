@@ -23,7 +23,7 @@
 
   **Setup**
   ``` typescript
-import { wrtcCreateServer, wrtcConnect, wrtcSocket } from "webRTC-Socket"
+import { wrtcCreateServer, wrtcConnect, WrtcSocket } from "webRTC-Socket";
 
 ```
 

@@ -1,7 +1,7 @@
 {
   "name": "webrtc-socket",
-  "version": "0.1.1",
-  "description": "DESCRIPTION_GOES_HERE",
+  "version": "0.1.5",
+  "description": "Uses Websockets to send WebRTC data to and from users",
   "main": "./out/webRTC-Socket.js",
   "scripts": {
     "test": "echo running server tests... && cd test && ts-node ../node_modules/blue-tape/bin/blue-tape \"**/*.ts\" | tap-spec",
