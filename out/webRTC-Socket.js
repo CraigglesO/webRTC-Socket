@@ -5,28 +5,31 @@ const buffer_1 = require("buffer");
 const stream_1 = require("stream");
 const MAX_REQUEST_LENGHT = 1024;
 function wrtcConnect(host, port) {
-    return new wrtcSocket(host, port);
+    return new WrtcSocket(host, port);
 }
 exports.wrtcConnect = wrtcConnect;
 function wrtcCreateServer(func) {
-    return new wrtcServer(func);
+    return new WrtcServer(func);
 }
 exports.wrtcCreateServer = wrtcCreateServer;
-class wrtcServer {
+class WrtcServer {
     constructor(func) {
         const self = this;
-        self.wss = null;
+        self.wss = null | WebSocket.Server;
         self.func = func;
     }
     initiate(port) {
         const self = this;
         self.wss = new WebSocket.Server({ port });
-        self.wss.on('connection', (ws) => {
-            ws = new wrtcIncomingSocket(ws);
-            ws.on('connect', () => {
+        self.wss.on("connection", (ws) => {
+            ws = new WrtcIncomingSocket(ws);
+            ws.on("connect", () => {
                 self.func(ws);
             });
         });
+    }
+    close() {
+        this.wss.close();
     }
     broadcast(payload) {
         this.wss.clients.forEach((client) => {
@@ -41,24 +44,24 @@ class wrtcServer {
             cb();
     }
 }
-class wrtcIncomingSocket extends stream_1.Duplex {
+class WrtcIncomingSocket extends stream_1.Duplex {
     constructor(ws) {
         super();
         const self = this;
         self.ready = false;
         self.ws = ws;
-        self.host = '127.0.0.1';
-        self.pc = new wrtc.RTCPeerConnection({ iceServers: [{ url: 'stun:stun.l.google.com:19302' }] }, { 'optional': [{ DtlsSrtpKeyAgreement: false }] });
+        self.host = "127.0.0.1";
+        self.pc = new wrtc.RTCPeerConnection({ iceServers: [{ url: "stun:stun.l.google.com:19302" }] }, { "optional": [{ DtlsSrtpKeyAgreement: false }] });
         self.offer = null;
         self.answer = null;
         self.remoteReceived = false;
-        self.dataChannelSettings = { 'reliable': { ordered: true, maxRetransmits: 0 } };
+        self.dataChannelSettings = { "reliable": { ordered: true, maxRetransmits: 0 } };
         self.pendingDataChannels = {};
         self.dataChannels = {};
         self.pendingCandidates = [];
-        ws.on('message', (payload) => {
+        ws.on("message", (payload) => {
             let data = JSON.parse(payload);
-            if ('offer' == data.type) {
+            if ("offer" === data.type) {
                 self.offer = new wrtc.RTCSessionDescription(data);
                 self.pc.onsignalingstatechange = (event) => {
                     if (event.target)
@@ -73,13 +76,13 @@ class wrtcIncomingSocket extends stream_1.Duplex {
                         self.emit("iceGatheringStateChange", event.target.iceGatheringState);
                 };
                 self.pc.onicecandidate = (candidate) => {
-                    ws.send(JSON.stringify({ 'type': 'ice',
-                        'sdp': { 'candidate': candidate.candidate, 'sdpMid': candidate.sdpMid, 'sdpMLineIndex': candidate.sdpMLineIndex }
+                    ws.send(JSON.stringify({ "type": "ice",
+                        "sdp": { "candidate": candidate.candidate, "sdpMid": candidate.sdpMid, "sdpMLineIndex": candidate.sdpMLineIndex }
                     }));
                 };
                 self.handleDataChannels();
             }
-            else if ('ice' == data.type) {
+            else if ("ice" === data.type) {
                 if (self.remoteReceived && data.sdp.candidate)
                     self.pc.addIceCandidate(new wrtc.RTCIceCandidate(data.sdp.candidate));
                 else
@@ -87,10 +90,14 @@ class wrtcIncomingSocket extends stream_1.Duplex {
             }
         });
     }
+    close() {
+        this.pc.close();
+        this.ws.close();
+    }
     send(payload) {
         if (buffer_1.Buffer.isBuffer(payload))
             payload = new Uint8Array(payload);
-        this.dataChannels['reliable'].send(payload);
+        this.dataChannels["reliable"].send(payload);
     }
     _read() {
     }
@@ -99,7 +106,7 @@ class wrtcIncomingSocket extends stream_1.Duplex {
     }
     complete() {
         this.ready = true;
-        this.emit('connect');
+        this.emit("connect");
     }
     handleError(err) {
         throw err;
@@ -132,7 +139,7 @@ class wrtcIncomingSocket extends stream_1.Duplex {
             let channel = event.channel;
             let label = channel.label;
             self.pendingDataChannels[label] = channel;
-            channel.binaryType = 'arraybuffer';
+            channel.binaryType = "arraybuffer";
             channel.onopen = () => {
                 self.dataChannels[label] = channel;
                 delete self.pendingDataChannels[label];
@@ -146,10 +153,10 @@ class wrtcIncomingSocket extends stream_1.Duplex {
                     data = new buffer_1.Buffer(event.data);
                 else
                     data = event.data;
-                self.emit('data', data);
+                self.emit("data", data);
             };
             channel.onclose = (event) => {
-                this.emit('close', event);
+                this.emit("close", event);
             };
             channel.onerror = self.handleError;
         };
@@ -160,7 +167,7 @@ class wrtcIncomingSocket extends stream_1.Duplex {
         self.pc.setRemoteDescription(self.offer, self.createAnswer.bind(self), self.handleError.bind(self));
     }
 }
-class wrtcSocket extends stream_1.Duplex {
+class WrtcSocket extends stream_1.Duplex {
     constructor(host, port, ws) {
         super();
         const self = this;
@@ -175,7 +182,7 @@ class wrtcSocket extends stream_1.Duplex {
         self.dataChannels = {};
         self.pendingCandidates = [];
         self.ws = (ws) ? ws : new WebSocket(self.bridge);
-        self.pc = new self.RTCPeerConnection({ iceServers: [{ url: 'stun:stun.l.google.com:19302' }] }, { 'optional': [] });
+        self.pc = new self.RTCPeerConnection({ iceServers: [{ url: "stun:stun.l.google.com:19302" }] }, { "optional": [] });
         self.pc.onsignalingstatechange = (event) => {
             if (event.target)
                 self.emit("stateChange", event.target.signalingState);
@@ -192,10 +199,10 @@ class wrtcSocket extends stream_1.Duplex {
             let candidate = event.candidate;
             if (!candidate)
                 return;
-            if (WebSocket.OPEN == self.ws.readyState) {
+            if (WebSocket.OPEN === self.ws.readyState) {
                 self.ws.send(JSON.stringify({
-                    'type': 'ice',
-                    'sdp': { 'candidate': candidate.candidate, 'sdpMid': candidate.sdpMid, 'sdpMLineIndex': candidate.sdpMLineIndex }
+                    "type": "ice",
+                    "sdp": { "candidate": candidate.candidate, "sdpMid": candidate.sdpMid, "sdpMLineIndex": candidate.sdpMLineIndex }
                 }));
             }
             else {
@@ -204,10 +211,14 @@ class wrtcSocket extends stream_1.Duplex {
         };
         self.createDataChannels();
     }
+    close() {
+        this.pc.close();
+        this.ws.close();
+    }
     send(payload) {
         if (buffer_1.Buffer.isBuffer(payload))
             payload = new Uint8Array(payload);
-        this.dataChannels['reliable'].send(payload);
+        this.dataChannels["reliable"].send(payload);
     }
     _read() {
     }
@@ -218,10 +229,10 @@ class wrtcSocket extends stream_1.Duplex {
         throw err;
     }
     ready() {
-        this.emit('connect');
+        this.emit("connect");
     }
     awaitingDataChannels() {
-        this.emit('awaitingDataChannels');
+        this.emit("awaitingDataChannels");
     }
     createDataChannels() {
         const self = this;
@@ -229,7 +240,7 @@ class wrtcSocket extends stream_1.Duplex {
         labels.forEach((label) => {
             let channelOptions = self.dataChannelSettings[label];
             let channel = self.pendingDataChannels[label] = self.pc.createDataChannel(label, channelOptions);
-            channel.binaryType = 'arraybuffer';
+            channel.binaryType = "arraybuffer";
             channel.onopen = () => {
                 self.dataChannels[label] = channel;
                 delete self.pendingDataChannels[label];
@@ -242,10 +253,10 @@ class wrtcSocket extends stream_1.Duplex {
                     data = new buffer_1.Buffer(event.data);
                 else
                     data = event.data;
-                self.emit('data', data);
+                self.emit("data", data);
             };
             channel.onclose = (event) => {
-                this.emit('close', event);
+                this.emit("close", event);
             };
             channel.onerror = self.handleError;
         });
@@ -260,18 +271,18 @@ class wrtcSocket extends stream_1.Duplex {
         self.ws.onopen = () => {
             self.pendingCandidates.forEach((candidate) => {
                 self.ws.send(JSON.stringify({
-                    'type': 'ice',
-                    'sdp': { 'candidate': candidate.candidate, 'sdpMid': candidate.sdpMid, 'sdpMLineIndex': candidate.sdpMLineIndex }
+                    "type": "ice",
+                    "sdp": { "candidate": candidate.candidate, "sdpMid": candidate.sdpMid, "sdpMLineIndex": candidate.sdpMLineIndex }
                 }));
             });
-            self.ws.send(JSON.stringify({ 'type': offer.type, 'sdp': offer.sdp }));
+            self.ws.send(JSON.stringify({ "type": offer.type, "sdp": offer.sdp }));
         };
         self.ws.onmessage = (event) => {
             let data = JSON.parse(event.data);
-            if ('answer' == data.type) {
+            if ("answer" === data.type) {
                 self.setRemoteDesc(data);
             }
-            else if ('ice' == data.type) {
+            else if ("ice" === data.type) {
                 if (data.sdp.candidate) {
                     let candidate = new self.RTCIceCandidate(data.sdp.candidate);
                     self.pc.addIceCandidate(candidate, self.handleAddIceCandidateSuccess.bind(self), self.handleAddIceCandidateError.bind(self));
@@ -285,4 +296,4 @@ class wrtcSocket extends stream_1.Duplex {
     handleAddIceCandidateSuccess() { }
     handleAddIceCandidateError() { }
 }
-exports.wrtcSocket = wrtcSocket;
+exports.WrtcSocket = WrtcSocket;
