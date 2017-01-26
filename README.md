@@ -33,7 +33,10 @@ import { wrtcCreateServer, wrtcConnect, WrtcSocket } from "webRTC-Socket";
 let SocketServer = wrtcCreateServer((socket) => {
 
   console.log('we are connected');
+  // Send A message
   socket.send('Hello client\n');
+
+  // Send a buffer
   let buf = Buffer.from('THIS IS A BUFFER');
   socket.send(buf);
 
