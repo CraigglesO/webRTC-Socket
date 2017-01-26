@@ -16,7 +16,7 @@
 ## Install
 
   ``` typescript
-  npm install webRTC-Socket
+  npm install webrtc-socket
   ```
 
 ## Usage
