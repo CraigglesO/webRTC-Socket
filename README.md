@@ -7,19 +7,19 @@
   [downloads-image]: https://img.shields.io/npm/dm/webrtc-socket.svg
   [downloads-url]: https://npmjs.org/package/webrtc-socket
 
-  ### Uses Websockets to send WebRTC data to and from users
+### Uses Websockets to send WebRTC data to and from users
 
   The general purpose of this project was to simplify the use of the WebRTC protocol. If you've worked with node, you have probably really enjoyed the workings of TCP and UDP. Very easy setup and go.
 
   I decided to replicate the simplicity with WebRTC. This is mean for sending data (buffers and strings) mind you. Other libraries would be more beneficial for media streams.
 
-  ## Install
+## Install
 
   ``` typescript
   npm install webRTC-Socket
   ```
 
-  ## Usage
+## Usage
 
   **Setup**
   ``` typescript
@@ -63,7 +63,7 @@ socket.on('data', (payload) => {
 
   ```
 
-  ## ISC License (Open Source Initiative)
+## ISC License (Open Source Initiative)
 
   ISC License (ISC)
   Copyright 2017 <CraigglesO>
