@@ -18,10 +18,10 @@ test("Test Typescript-Ready", (t) => {
 
   });
 
-  SocketServer.listen(9001);
+  SocketServer.listen(4001);
 
   // Client
-  let clientSocket = wrtcConnect("127.0.0.1", 9001);
+  let clientSocket = wrtcConnect("127.0.0.1", 4001);
 
   clientSocket.on("connect", () => {
     clientSocket.send("Hello Server");

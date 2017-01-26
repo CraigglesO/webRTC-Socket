@@ -11,8 +11,8 @@ test("Test Typescript-Ready", (t) => {
             SocketServer.close();
         });
     });
-    SocketServer.listen(9001);
-    let clientSocket = webRTC_Socket_1.wrtcConnect("127.0.0.1", 9001);
+    SocketServer.listen(4001);
+    let clientSocket = webRTC_Socket_1.wrtcConnect("127.0.0.1", 4001);
     clientSocket.on("connect", () => {
         clientSocket.send("Hello Server");
     });
