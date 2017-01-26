@@ -2,7 +2,7 @@
     "name": "webRTC-Socket",
     "main": "webRTC-Socket.d.ts",
     "homepage": "",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "globalDevDependencies": {
       "node": "registry:env/node#6.0.0+20170119204930"
     },

@@ -2,7 +2,7 @@ import * as test from "blue-tape";
 import { wrtcCreateServer, wrtcConnect, WrtcSocket } from "../webRTC-Socket";
 
 
-test("Test Typescript-Ready", (t) => {
+test("Test Client and Server talking", (t) => {
   t.plan(2);
 
   // Server
@@ -18,10 +18,10 @@ test("Test Typescript-Ready", (t) => {
 
   });
 
-  SocketServer.listen(4001);
+  SocketServer.listen(9001);
 
   // Client
-  let clientSocket = wrtcConnect("127.0.0.1", 4001);
+  let clientSocket = wrtcConnect(9001, "127.0.0.1");
 
   clientSocket.on("connect", () => {
     clientSocket.send("Hello Server");
