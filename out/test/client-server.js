@@ -22,5 +22,5 @@ test("Test Typescript-Ready", (t) => {
     });
     setTimeout(() => {
         t.end();
-    }, 4000);
+    }, 3500);
 });
