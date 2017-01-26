@@ -19,7 +19,7 @@ interface Candidate {
 
 const MAX_REQUEST_LENGHT = 1024;
 
-function wrtcConnect(host: string, port: number): WrtcSocket {
+function wrtcConnect(port: number, host: string): WrtcSocket {
   return new WrtcSocket(host, port);
 }
 

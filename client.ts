@@ -1,6 +1,6 @@
 import { wrtcConnect, WrtcSocket } from "./WebRTC-Socket";
 
-let Socket = wrtcConnect("127.0.0.1", 9001);
+let Socket = wrtcConnect(9001, "127.0.0.1");
 
 Socket.on("connect", () => {
   console.log(Socket.remoteAddress);

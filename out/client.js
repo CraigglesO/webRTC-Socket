@@ -1,6 +1,6 @@
 "use strict";
 const WebRTC_Socket_1 = require("./WebRTC-Socket");
-let Socket = WebRTC_Socket_1.wrtcConnect("127.0.0.1", 9001);
+let Socket = WebRTC_Socket_1.wrtcConnect(9001, "127.0.0.1");
 Socket.on("connect", () => {
     console.log(Socket.remoteAddress);
     console.log(Socket.remotePort);

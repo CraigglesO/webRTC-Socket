@@ -4,7 +4,7 @@ const WebSocket = require("ws");
 const buffer_1 = require("buffer");
 const stream_1 = require("stream");
 const MAX_REQUEST_LENGHT = 1024;
-function wrtcConnect(host, port) {
+function wrtcConnect(port, host) {
     return new WrtcSocket(host, port);
 }
 exports.wrtcConnect = wrtcConnect;
