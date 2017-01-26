@@ -1,6 +1,6 @@
 {
   "name": "webrtc-socket",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Uses Websockets to send WebRTC data to and from users",
   "main": "./out/webRTC-Socket.js",
   "scripts": {
