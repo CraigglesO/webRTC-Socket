@@ -7,9 +7,11 @@
   [downloads-image]: https://img.shields.io/npm/dm/webrtc-socket.svg
   [downloads-url]: https://npmjs.org/package/webrtc-socket
 
-  ### BASIC_INFO_OF_PROJECT_GOES_HERE
+  ### Uses Websockets to send WebRTC data to and from users
 
-  INFORMATION_GOES_HERE
+  The general purpose of this project was to simplify the use of the WebRTC protocol. If you've worked with node, you have probably really enjoyed the workings of TCP and UDP. Very easy setup and go.
+
+  I decided to replicate the simplicity with WebRTC. This is mean for sending data (buffers and strings) mind you. Other libraries would be more beneficial for media streams.
 
   ## Install
 
@@ -18,10 +20,46 @@
   ```
 
   ## Usage
-  ``` typescript
-  import * as x from "webRTC-Socket"
 
-  EXAMPLE_USAGE_GOES_HERE
+  **Setup**
+  ``` typescript
+import { wrtcCreateServer, wrtcConnect, wrtcSocket } from "webRTC-Socket"
+
+```
+
+  **Server**
+``` typescript
+
+let SocketServer = wrtcCreateServer((socket) => {
+
+  console.log('we are connected');
+  socket.send('Hello client\n');
+  let buf = Buffer.from('THIS IS A BUFFER');
+  socket.send(buf);
+
+  socket.on('data', (payload) => {
+    console.log('recieved: ', payload);
+  });
+
+}).listen(9001);
+
+  ```
+
+  **Client**
+``` typescript
+
+let Socket = wrtcConnect('127.0.0.1', 9001);
+
+Socket.on('connect', () => {
+  console.log('we are connected');
+  Socket.send('Hello Bridge');
+});
+
+Socket.pipe(process.stdout);
+// OR:
+socket.on('data', (payload) => {
+  console.log(payload);
+});
 
   ```
 
