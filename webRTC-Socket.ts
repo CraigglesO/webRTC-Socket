@@ -74,7 +74,9 @@ class WrtcServer {
 class WrtcIncomingSocket extends Duplex {
   ready:               Boolean;
   ws:                  WebSocket;
-  host:                string;
+  remoteAddress:       string;
+  remoteFamily:        string;
+  remotePort:          number;
   pc:                  wrtc.RTCPeerConnection;
   offer:               null | wrtc.RTCSessionDescription;
   answer:              null;
@@ -90,7 +92,9 @@ class WrtcIncomingSocket extends Duplex {
 
     self.ready               = false;
     self.ws                  = ws;
-    self.host                = "127.0.0.1";
+    self.remoteAddress       = null;
+    self.remoteFamily        = "webrtc";
+    self.remotePort          = null;
     self.pc                  = new wrtc.RTCPeerConnection({ iceServers: [{url: "stun:stun.l.google.com:19302"}] }, { "optional": [{DtlsSrtpKeyAgreement: false}] } );
     self.offer               = null;
     self.answer              = null;
@@ -130,13 +134,19 @@ class WrtcIncomingSocket extends Duplex {
         self.handleDataChannels();
 
       } else if ("ice" === data.type) {
-        if (self.remoteReceived && data.sdp.candidate)
+        if (self.remoteReceived && data.sdp.candidate) {
+          self.parseCandidate(data.sdp.candidate);
           self.pc.addIceCandidate(new wrtc.RTCIceCandidate(data.sdp.candidate));
-        else
+        } else
           self.pendingCandidates.push(data);
       }
     });
 
+  }
+
+  parseCandidate(candidate: string) {
+    this.remoteAddress = candidate.split(" ")[4];
+    this.remotePort    = Number(candidate.split(" ")[5]);
   }
 
   close() {
@@ -245,6 +255,9 @@ class WrtcIncomingSocket extends Duplex {
 class WrtcSocket extends Duplex {
   host:                  string;
   port:                  number;
+  remoteAddress:         string;
+  remoteFamily:          string;
+  remotePort:            number;
   bridge:                string;
   RTCPeerConnection:     wrtc.RTCPeerConnection;
   RTCSessionDescription: wrtc.RTCSessionDescription;
@@ -262,6 +275,9 @@ class WrtcSocket extends Duplex {
 
     self.host                  = host;
     self.port                  = port;
+    self.remoteAddress         = null;
+    self.remoteFamily          = "webrtc";
+    self.remotePort            = null;
     self.bridge                = "ws://" + host + ":" + port.toString();
     self.RTCPeerConnection     = wrtc.RTCPeerConnection;
     self.RTCSessionDescription = wrtc.RTCSessionDescription;
@@ -297,12 +313,18 @@ class WrtcSocket extends Duplex {
           })
         );
       } else {
+        self.parseCandidate(candidate.candidate);
         self.pendingCandidates.push(candidate);
       }
     };
 
     self.createDataChannels();
 
+  }
+
+  parseCandidate(candidate: string) {
+    this.remoteAddress = candidate.split(" ")[4];
+    this.remotePort    = Number(candidate.split(" ")[5]);
   }
 
   close() {
@@ -321,7 +343,7 @@ class WrtcSocket extends Duplex {
   }
 
   _write(payload: Buffer, encoding: string, next: Function) {
-
+    this.send(payload);
     next(null);
   }
 

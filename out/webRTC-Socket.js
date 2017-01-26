@@ -50,7 +50,9 @@ class WrtcIncomingSocket extends stream_1.Duplex {
         const self = this;
         self.ready = false;
         self.ws = ws;
-        self.host = "127.0.0.1";
+        self.remoteAddress = null;
+        self.remoteFamily = "webrtc";
+        self.remotePort = null;
         self.pc = new wrtc.RTCPeerConnection({ iceServers: [{ url: "stun:stun.l.google.com:19302" }] }, { "optional": [{ DtlsSrtpKeyAgreement: false }] });
         self.offer = null;
         self.answer = null;
@@ -83,12 +85,18 @@ class WrtcIncomingSocket extends stream_1.Duplex {
                 self.handleDataChannels();
             }
             else if ("ice" === data.type) {
-                if (self.remoteReceived && data.sdp.candidate)
+                if (self.remoteReceived && data.sdp.candidate) {
+                    self.parseCandidate(data.sdp.candidate);
                     self.pc.addIceCandidate(new wrtc.RTCIceCandidate(data.sdp.candidate));
+                }
                 else
                     self.pendingCandidates.push(data);
             }
         });
+    }
+    parseCandidate(candidate) {
+        this.remoteAddress = candidate.split(" ")[4];
+        this.remotePort = Number(candidate.split(" ")[5]);
     }
     close() {
         this.pc.close();
@@ -173,6 +181,9 @@ class WrtcSocket extends stream_1.Duplex {
         const self = this;
         self.host = host;
         self.port = port;
+        self.remoteAddress = null;
+        self.remoteFamily = "webrtc";
+        self.remotePort = null;
         self.bridge = "ws://" + host + ":" + port.toString();
         self.RTCPeerConnection = wrtc.RTCPeerConnection;
         self.RTCSessionDescription = wrtc.RTCSessionDescription;
@@ -206,10 +217,15 @@ class WrtcSocket extends stream_1.Duplex {
                 }));
             }
             else {
+                self.parseCandidate(candidate.candidate);
                 self.pendingCandidates.push(candidate);
             }
         };
         self.createDataChannels();
+    }
+    parseCandidate(candidate) {
+        this.remoteAddress = candidate.split(" ")[4];
+        this.remotePort = Number(candidate.split(" ")[5]);
     }
     close() {
         this.pc.close();
@@ -223,6 +239,7 @@ class WrtcSocket extends stream_1.Duplex {
     _read() {
     }
     _write(payload, encoding, next) {
+        this.send(payload);
         next(null);
     }
     handleError(err) {
