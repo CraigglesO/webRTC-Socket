@@ -1,6 +1,6 @@
 {
   "name": "webrtc-socket",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "DESCRIPTION_GOES_HERE",
   "main": "./out/webRTC-Socket.js",
   "scripts": {
