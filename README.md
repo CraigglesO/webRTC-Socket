@@ -11,7 +11,7 @@
 
   The general purpose of this project was to simplify the use of the WebRTC protocol. If you've worked with node, you have probably really enjoyed the workings of TCP and UDP. Very easy setup and go.
 
-  I decided to replicate the simplicity with WebRTC. This is mean for sending data (buffers and strings) mind you. Other libraries would be more beneficial for media streams.
+  I decided to replicate the simplicity with WebRTC. This is meant for sending data (buffers and strings) mind you. Other libraries would be more beneficial for media streams.
 
 ## Install
 

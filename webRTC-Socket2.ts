@@ -194,7 +194,7 @@ class WrtcIncomingSocket extends Duplex {
       self.setLocalDesc.bind(self),
       self.handleError.bind(self)
     );
-  };
+  }
 
   setLocalDesc(desc) {
     const self = this;
@@ -204,7 +204,7 @@ class WrtcIncomingSocket extends Duplex {
       self.sendAnswer.bind(self),
       self.handleError.bind(self)
     );
-  };
+  }
 
   sendAnswer() {
     const self = this;
@@ -420,17 +420,6 @@ class WrtcSocket extends Duplex {
       self.ws.send( JSON.stringify({"type": offer.type, "sdp": offer.sdp}) );
     };
 
-    self.ws.onmessage = (event) => {
-      let data = JSON.parse(event.data);
-      if ("answer" === data.type) {
-        self.setRemoteDesc(data);
-      } else if ("ice" === data.type) {
-        if (data.sdp.candidate) {
-          let candidate = new self.RTCIceCandidate(data.sdp.candidate);
-          self.pc.addIceCandidate(candidate, self.handleAddIceCandidateSuccess.bind(self), self.handleAddIceCandidateError.bind(self));
-        }
-      }
-    };
   }
 
   setRemoteDesc (desc) {
